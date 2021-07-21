@@ -1,7 +1,3 @@
-variable "public_key" {
-  description = "Public key for user credentials"
-}
-
 variable "securiti_token" {
   description = "Token to update pod IP."
 }
