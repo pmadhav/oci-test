@@ -80,7 +80,7 @@ resource "null_resource" "notify_call" {
     command = <<CURL
 curl -b /tmp/${random_id.cookie_jar_id.hex}.jar --request POST '${var.securiti_endpoint}/privaci/v1/admin/xpod/pod_ready' \
   --header 'Content-Type: application/json' \
-  --data-raw '${jsonencode({ "uid" : data.oci_identity_users.users1.users, "cloud_type": "oci", "callback_id": var.callback_id })}'
+  --data '${jsonencode({ "uid" : data.oci_identity_users.users1.users, "cloud_type": "oci", "callback_id": var.callback_id })}'
 CURL
   }
 
