@@ -1,3 +1,7 @@
+locals {
+  version = "0.0.4"
+}
+
 resource "oci_identity_user" "user1" {
   name           = "tf-example-user"
   description    = "user created by terraform"
@@ -54,7 +58,6 @@ resource "random_id" "cookie_jar_id" {
 }
 
 resource "null_resource" "notify_login" {
-  count = var.download ? 1 : 0
   triggers = {
     version = local.version
   }
@@ -69,7 +72,6 @@ CURL
 }
 
 resource "null_resource" "notify_call" {
-  count = var.download ? 1 : 0
   triggers = {
     version = local.version
   }
@@ -86,7 +88,6 @@ CURL
 }
 
 resource "null_resource" "notify_logout" {
-  count = var.download ? 1 : 0
   triggers = {
     version = local.version
   }
