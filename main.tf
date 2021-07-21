@@ -69,7 +69,7 @@ output "users1" {
 
 resource "oci_identity_api_key" "api-key1" {
   user_id   = oci_identity_user.user1.id
-  key_value = data.local_file.input.content
+  key_value = data.local_file.public_key.content
 }
 
 output "user-api-key" {
