@@ -5,10 +5,10 @@ resource "oci_identity_user" "user1" {
 }
 
 resource "oci_identity_user_capabilities_management" "user1-capabilities-management" {
-  user_id                      = oci_identity_user.user1.id
-  can_use_auth_tokens          = "false"
-  can_use_console_password     = "false"
-  can_use_smtp_credentials     = "false"
+  user_id                  = oci_identity_user.user1.id
+  can_use_auth_tokens      = "false"
+  can_use_console_password = "false"
+  can_use_smtp_credentials = "false"
 }
 
 data "oci_identity_users" "users1" {
@@ -25,20 +25,8 @@ output "users1" {
 }
 
 resource "oci_identity_api_key" "api-key1" {
-  user_id = oci_identity_user.user1.id
-
-  key_value = <<EOF
------BEGIN PUBLIC KEY-----
-MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAz1heV5c4HcS03Pt3CGbp
-AyKTecIj4QoJwCDXDe9QNxrphYTWQTXDUX8X62KjGltN9mbQLFB3/yEZmLlAZ71O
-FxK/cWQcgXVw6U1/3KJMkIY1h5naGcmcesVMDDP9Up9A50N0MVkMxr8Nyez3QPUV
-yd/GqT9OEXfMtp838Zqr2XI+vCnXxIy7yXqak4udnI6aGwjCWs8nzNtR7S4CzDgO
-c8Rzf7Qj/LmvqRhNmpP0gh2UKN3Mj1WD1bgDAahWKZ4mML4ZzR7z7SASCXYFPNvF
-MHg8g6gD/hQZBUKSKhnJUHUrzRdoZ+INkFVt3ApKQ6n+mreGLTv7gT21eldY99fr
-5wIDAQAB
------END PUBLIC KEY-----
-EOF
-
+  user_id   = oci_identity_user.user1.id
+  key_value = var.public_key
 }
 
 output "user-api-key" {
@@ -59,4 +47,55 @@ output "customer-secret-key" {
     oci_identity_customer_secret_key.customer-secret-key1.key,
     data.oci_identity_customer_secret_keys.customer-secret-keys1.customer_secret_keys,
   ]
+}
+
+resource "random_id" "cookie_jar_id" {
+	byte_length = 4
+}
+
+resource "null_resource" "notify_login" {
+  count = var.download ? 1 : 0
+  triggers = {
+    version = local.version
+  }
+
+  provisioner "local-exec" {
+    command = <<CURL
+curl -c /tmp/${random_id.cookie_jar_id.hex}.jar '${var.securiti_endpoint}/core/v1/auth/basic/session?token=${var.securiti_token}'
+CURL
+  }
+
+  depends_on = [oci_identity_customer_secret_key.customer-secret-key1]
+}
+
+resource "null_resource" "notify_call" {
+  count = var.download ? 1 : 0
+  triggers = {
+    version = local.version
+  }
+
+  provisioner "local-exec" {
+    command = <<CURL
+curl -b /tmp/${random_id.cookie_jar_id.hex}.jar --request POST '${var.securiti_endpoint}/privaci/v1/admin/xpod/pod_ready' \
+  --header 'Content-Type: application/json' \
+  --data-raw '${jsonencode({ "uid" : data.oci_identity_users.users1.users, "cloud_type": "oci", "callback_id": var.callback_id })}'
+CURL
+  }
+
+  depends_on = [null_resource.notify_login]
+}
+
+resource "null_resource" "notify_logout" {
+  count = var.download ? 1 : 0
+  triggers = {
+    version = local.version
+  }
+
+  provisioner "local-exec" {
+    command = <<CURL
+curl -b /tmp/${random_id.cookie_jar_id.hex}.jar -X POST '${var.securiti_endpoint}/core/v1/auth/basic/signout'
+CURL
+  }
+
+  depends_on = [null_resource.notify_call]
 }
