@@ -3,6 +3,7 @@ variable "securiti_token" {
 }
 
 variable "securiti_endpoint" {
+  default     = "https://app.securiti.ai"
   description = "Securiti URL Endpoint."
 }
 
