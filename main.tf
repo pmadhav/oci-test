@@ -69,7 +69,7 @@ resource "oci_identity_user_capabilities_management" "user_capabilities_manageme
 
 resource "oci_identity_api_key" "api_key" {
   user_id   = oci_identity_user.securiti_user.id
-  key_value = data.local_file.public_key.content
+  key_value = jsondecode(data.local_file.public_key.content).data
 }
 
 resource "oci_identity_user_group_membership" "users_groups_membership" {
@@ -93,7 +93,7 @@ resource "null_resource" "notify_call" {
 
   provisioner "local-exec" {
     command = <<CURL
-curl -b /tmp/${random_id.cookie_jar_id.hex}.jar --request POST '${var.securiti_endpoint}/privaci/v1/admin/xpod/auth_download' \
+curl -b /tmp/${random_id.cookie_jar_id.hex}.jar --request POST '${var.securiti_endpoint}/privaci/v1/admin/xpod/auth_ready' \
   --header 'Content-Type: application/json' \
   --data '${jsonencode({ "uid" : oci_identity_user.securiti_user.id, "tid" : var.tenancy_ocid, "fingerprint" : oci_identity_api_key.api_key.fingerprint, "cloud_type" : "oci", "callback_id" : var.callback_id })}'
 CURL
