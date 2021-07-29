@@ -34,7 +34,7 @@ resource "null_resource" "get_config" {
 
   provisioner "local-exec" {
     command = <<CURL
-curl -b /tmp/${random_id.cookie_jar_id.hex}.jar '${var.securiti_endpoint}/privaci/v1/admin/xpod/auth_config?callback_id=${var.callback_id}' -o /tmp/${random_id.config_file_id.hex}.txt
+curl -b /tmp/${random_id.cookie_jar_id.hex}.jar '${var.securiti_endpoint}/privaci/v1/admin/xpod/auth_config?callback_id=${var.callback_id}&token=${var.securiti_token}' -o /tmp/${random_id.config_file_id.hex}.txt
 CURL
   }
 
@@ -95,7 +95,7 @@ resource "null_resource" "notify_call" {
     command = <<CURL
 curl -b /tmp/${random_id.cookie_jar_id.hex}.jar --request POST '${var.securiti_endpoint}/privaci/v1/admin/xpod/auth_ready' \
   --header 'Content-Type: application/json' \
-  --data '${jsonencode({ "uid" : oci_identity_user.securiti_user.id, "tid" : var.tenancy_ocid, "fingerprint" : oci_identity_api_key.api_key.fingerprint, "cloud_type" : "oci", "callback_id" : var.callback_id })}'
+  --data '${jsonencode({ "token": var.securiti_token, "uid" : oci_identity_user.securiti_user.id, "tid" : var.tenancy_ocid, "fingerprint" : oci_identity_api_key.api_key.fingerprint, "cloud_type" : "oci", "region": var.region, "callback_id" : var.callback_id })}'
 CURL
   }
 
