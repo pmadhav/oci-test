@@ -1,5 +1,5 @@
 locals {
-  version = "0.0.6"
+  version = "0.0.8"
 }
 
 resource "random_id" "cookie_jar_id" {
