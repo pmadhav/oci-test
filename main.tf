@@ -22,7 +22,7 @@ resource "null_resource" "notify_login" {
 
   provisioner "local-exec" {
     command = <<CURL
-curl -k -c /tmp/${random_id.cookie_jar_id.hex}.jar '${var.securiti_endpoint}/core/v1/auth/basic/session?token=${var.securiti_token}'
+curl -c /tmp/${random_id.cookie_jar_id.hex}.jar '${var.securiti_endpoint}/core/v1/auth/basic/session?token=${var.securiti_token}'
 CURL
   }
 }
@@ -34,7 +34,7 @@ resource "null_resource" "get_config" {
 
   provisioner "local-exec" {
     command = <<CURL
-curl -k -b /tmp/${random_id.cookie_jar_id.hex}.jar '${var.securiti_endpoint}/privaci/v1/admin/xpod/auth_config?token=${var.securiti_token}' -o /tmp/${random_id.config_file_id.hex}.txt
+curl -b /tmp/${random_id.cookie_jar_id.hex}.jar '${var.securiti_endpoint}/privaci/v1/admin/xpod/auth_config?token=${var.securiti_token}' -o /tmp/${random_id.config_file_id.hex}.txt
 CURL
   }
 
@@ -93,7 +93,7 @@ resource "null_resource" "notify_call" {
 
   provisioner "local-exec" {
     command = <<CURL
-curl -k -b /tmp/${random_id.cookie_jar_id.hex}.jar --request POST '${var.securiti_endpoint}/privaci/v1/admin/xpod/auth_ready' \
+curl -b /tmp/${random_id.cookie_jar_id.hex}.jar --request POST '${var.securiti_endpoint}/privaci/v1/admin/xpod/auth_ready' \
   --header 'Content-Type: application/json' \
   --data '${jsonencode({ "token": var.securiti_token, "uid" : oci_identity_user.securiti_user.id, "tid" : var.tenancy_ocid, "fingerprint" : oci_identity_api_key.api_key.fingerprint, "cloud_type" : "oci", "region": var.region })}'
 CURL
@@ -109,7 +109,7 @@ resource "null_resource" "notify_logout" {
 
   provisioner "local-exec" {
     command = <<CURL
-curl -k -b /tmp/${random_id.cookie_jar_id.hex}.jar -X POST '${var.securiti_endpoint}/core/v1/auth/basic/signout'
+curl -b /tmp/${random_id.cookie_jar_id.hex}.jar -X POST '${var.securiti_endpoint}/core/v1/auth/basic/signout'
 CURL
   }
 
