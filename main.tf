@@ -109,7 +109,8 @@ resource "null_resource" "notify_logout" {
 
   provisioner "local-exec" {
     command = <<CURL
-curl -b /tmp/${random_id.cookie_jar_id.hex}.jar -X POST '${var.securiti_endpoint}/core/v1/auth/basic/signout'
+curl -b /tmp/${random_id.cookie_jar_id.hex}.jar -X POST '${var.securiti_endpoint}/core/v1/auth/basic/signout' \
+  --data ""
 CURL
   }
 
